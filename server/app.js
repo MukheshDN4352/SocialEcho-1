@@ -19,7 +19,7 @@ const Database = require("./config/database");
 const decodeToken = require("./middlewares/auth/decodeToken");
 
 const app = express();
-
+app.set("trust proxy", true);
 const cors = require("cors");
 const morgan = require("morgan");
 const passport = require("passport");
@@ -35,7 +35,11 @@ db.connect().catch((err) =>
   console.error("Error connecting to database:", err)
 );
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 app.use(morgan("dev"));
 app.use("/assets/userFiles", express.static(__dirname + "/assets/userFiles"));
 app.use(

@@ -21,7 +21,6 @@ const createPost = async (req, res) => {
       _id: { $eq: communityId },
       members: { $eq: userId },
     });
-
     if (!community) {
       if (file) {
         const filePath = `./assets/userFiles/${file.filename}`;
@@ -59,6 +58,7 @@ const createPost = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Error creating post",
+      reason: error.message,
     });
   }
 };

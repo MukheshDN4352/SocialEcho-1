@@ -7,9 +7,9 @@ const fs = require("fs");
  * @param next - createPost (/controllers/post.controller.js)
  */
 const postConfirmation = async (req, res, next) => {
+  console.log("i am here");
   if (req.failedDetection) {
     const confirmationToken = generateConfirmationToken(req.userId);
-
     try {
       const { content, communityId } = req.body;
       const { userId, file, fileUrl, fileType } = req;
