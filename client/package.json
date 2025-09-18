@@ -1,8 +1,8 @@
 {
   "name": "client",
-  "version": "0.1.0",
+  "version": "0.1.0", 
   "private": true,
-  "proxy": "http://127.0.0.1:4000",
+  "proxy": "http://backend-server:4000",
   "dependencies": {
     "@headlessui/react": "^1.7.13",
     "@heroicons/react": "^1.0.6",
