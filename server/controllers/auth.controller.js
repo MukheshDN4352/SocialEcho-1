@@ -313,7 +313,7 @@ const addContextData = async (req, res) => {
     device,
     deviceType,
   });
-
+  
   try {
     await newUserContext.save();
     res.status(200).json({

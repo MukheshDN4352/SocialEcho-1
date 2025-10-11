@@ -1,22 +1,36 @@
-# Use Node.js image
-FROM node:18-alpine
+
+FROM node:18-alpine AS build
 
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy dependency files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies (clean, reproducible install)
+RUN npm ci
 
-# Copy the rest of the project
+# Add Babel plugin (for CRA compatibility with private props)
+RUN npm install --save-dev @babel/plugin-proposal-private-property-in-object
+
+# Copy source code
 COPY . .
 
-# Expose React dev server port
-EXPOSE 3000
+# Build production assets
+RUN npm run build
 
-ENV HOST=0.0.0.0
 
-# Start React app in development mode
-CMD ["npm", "start"]
+
+FROM nginx:alpine
+
+# Copy built static files from build stage
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Remove default nginx config and replace with a custom one
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose port 80
+EXPOSE 80
+
+# Start Nginx in the foreground
+CMD ["nginx", "-g", "daemon off;"]
