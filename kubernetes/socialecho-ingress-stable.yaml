@@ -1,47 +1,26 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: socialecho-ingress
+  name: socialecho-ingress-stable
   namespace: socialecho
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/healthcheck-path: /server-status
-    # Canary routing
-    alb.ingress.kubernetes.io/canary: "true"                   # Marks this rule as canary
-    alb.ingress.kubernetes.io/canary-weight: "10"             # Send 10% traffic
 spec:
   ingressClassName: alb
   rules:
     - host: k8s-socialec-socialec-c956ab9939-933116048.ap-south-1.elb.amazonaws.com
       http:
         paths:
-          # Stable traffic (90%)
           - path: /api
             pathType: Prefix
             backend:
               service:
-                name: frontend
+                name: backend
                 port:
-                  number: 80
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: frontend
-                port:
-                  number: 80
-    # Default catch-all rule (optional)
-    - http:
-        paths:
-          - path: /api
-            pathType: Prefix
-            backend:
-              service:
-                name: frontend
-                port:
-                  number: 80
+                  number: 4000
           - path: /
             pathType: Prefix
             backend:
