@@ -10,8 +10,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building project from master branch...'
-                // You can add build steps here, e.g.:
-                // sh 'mvn clean package'
+               
             }
         }
     }
