@@ -46,7 +46,7 @@ app.use(
   "/api/assets/userAvatars",
   express.static(__dirname + "/api/assets/userAvatars")
 );
-
+//addded this line
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
