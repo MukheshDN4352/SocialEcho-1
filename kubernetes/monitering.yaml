@@ -1,0 +1,130 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: amazon-cloudwatch
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cwagentconfig
+  namespace: amazon-cloudwatch
+  labels:
+    k8s-app: cloudwatch-agent
+data:
+  cwagentconfig.json: |
+    {
+      "agent": {
+        "region": "ap-south-1"
+      },
+      "metrics": {
+        "namespace": "ContainerInsights/EKS",
+        "cluster_name": "test",
+        "metrics_collected": {
+          "cpu": { "measurement": ["usage_total"] },
+          "mem": { "measurement": ["usage", "working_set"] },
+          "disk": { "measurement": ["used_percent"] },
+          "net": { "measurement": ["rx_bytes", "tx_bytes"] },
+          "k8sapiserver": { "measurement": ["request_count", "request_latencies"] },
+          "cadvisor": { "measurement": ["container_cpu_usage_seconds_total", "container_memory_usage_bytes"] }
+        },
+        "append_dimensions": {
+          "ClusterName": "test",
+          "InstanceId": "${aws:InstanceId}"
+        }
+      }
+    }
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cloudwatch-agent
+  namespace: amazon-cloudwatch
+  labels:
+    k8s-app: cloudwatch-agent
+spec:
+  selector:
+    matchLabels:
+      name: cloudwatch-agent
+  template:
+    metadata:
+      labels:
+        name: cloudwatch-agent
+    spec:
+      serviceAccountName: cloudwatch-agent
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: cloudwatch-agent
+        image: amazon/cloudwatch-agent:latest
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: 200Mi
+            cpu: 200m
+          requests:
+            memory: 100Mi
+            cpu: 100m
+        env:
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: HOST_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: K8S_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: CI_VERSION
+          value: "k8s/1.3.16"
+        volumeMounts:
+        - name: cwagentconfig
+          mountPath: /etc/cwagentconfig
+        - name: rootfs
+          mountPath: /rootfs
+          readOnly: true
+        - name: varlibdocker
+          mountPath: /var/lib/docker
+          readOnly: true
+        - name: varlibcontainerd
+          mountPath: /var/lib/containerd
+          readOnly: true
+        - name: containerdsock
+          mountPath: /run/containerd/containerd.sock
+          readOnly: true
+        - name: sys
+          mountPath: /sys
+          readOnly: true
+        - name: devdisk
+          mountPath: /dev/disk
+          readOnly: true
+      volumes:
+      - name: cwagentconfig
+        configMap:
+          name: cwagentconfig
+      - name: rootfs
+        hostPath:
+          path: /
+      - name: varlibdocker
+        hostPath:
+          path: /var/lib/docker
+      - name: varlibcontainerd
+        hostPath:
+          path: /var/lib/containerd
+      - name: containerdsock
+        hostPath:
+          path: /run/containerd/containerd.sock
+          type: Socket
+      - name: sys
+        hostPath:
+          path: /sys
+      - name: devdisk
+        hostPath:
+          path: /dev/disk/
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudwatch-agent
+  namespace: amazon-cloudwatch

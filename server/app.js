@@ -64,6 +64,11 @@ app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/communities", communityRoutes);
 app.use("/api/admin", adminRoutes);
+ 
+app.get("/api/version", (req, res) => {
+  res.json({ version: "canary-version-2" });
+});
+
 
 process.on("SIGINT", async () => {
   try {

@@ -5,23 +5,24 @@ metadata:
   namespace: socialecho
   annotations:
     kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/load-balancer-name: socialecho-alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/healthcheck-path: /server-status
 spec:
   ingressClassName: alb
   rules:
-    - host: k8s-socialec-socialec-c956ab9939-933116048.ap-south-1.elb.amazonaws.com
+    - host: socialecho-alb-1790495170.ap-south-1.elb.amazonaws.com
       http:
         paths:
-          - path: /api
+          - path: /api/*
             pathType: Prefix
             backend:
               service:
                 name: backend
                 port:
                   number: 4000
-          - path: /
+          - path: /*
             pathType: Prefix
             backend:
               service:

@@ -119,7 +119,7 @@ const SignIn = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="block w-full rounded-lg border bg-white px-11 py-3 text-gray-700 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40"
-              placeholder="Email address"
+              placeholder="this is updated palceholder"
               required
               autoComplete="off"
             />
@@ -148,7 +148,7 @@ const SignIn = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="block w-full rounded-lg border bg-white px-10 py-3 text-gray-700 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40"
-              placeholder="Password"
+              placeholder="this is updated palceholder"
               required
               autoComplete="off"
             />
