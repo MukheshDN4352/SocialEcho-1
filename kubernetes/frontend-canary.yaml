@@ -22,7 +22,7 @@ spec:
         eks.amazonaws.com/nodegroup: canary-ng    # Updated for EKS nodegroup
       containers:
       - name: frontend
-        image: mukheshdn/frontend:5
+        image: mukheshdn/frontend:7
         ports:
         - containerPort: 80
         resources:
