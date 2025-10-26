@@ -56,7 +56,7 @@ app.get("/api/server-status", (req, res) => {
   res.status(200).json({ message: "Server is up and running!" });
 });
 app.get('/', (req, res) => res.status(200).send('OK'));
-
+// assfjsls-
 app.get("/api/search", decodeToken, search);
 
 app.use("/api/auth", contextAuthRoutes);

@@ -7,6 +7,7 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'dockerhub-creds'
         GITHUB_CREDENTIALS_ID = 'github-token'   // GitHub username/password credential ID
     }
+    
 
     stages {
 
