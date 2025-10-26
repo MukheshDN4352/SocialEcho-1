@@ -10,34 +10,28 @@ pipeline {
 
     stages {
 
-        // stage('Skip Jenkins Commits') {
-        //     steps {
-        //         script {
-        //             // Get the author of the last commit
-        //             def lastAuthor = sh(
-        //                 script: 'git log -1 --pretty=format:%an',
-        //                 returnStdout: true
-        //             ).trim()
+        stage('Skip Jenkins Commits') {
+            steps {
+                script {
+                    // Get the author of the last commit
+                    def lastAuthor = sh(
+                        script: 'git log -1 --pretty=format:%an',
+                        returnStdout: true
+                    ).trim()
 
-        //             echo "Last commit author: ${lastAuthor}"
+                    echo "Last commit author: ${lastAuthor}"
 
-        //             // Skip the build if author is Jenkins
-        //             if (lastAuthor == "Jenkins CI") {
-        //                 echo "Last commit was by Jenkins. Skipping build to avoid infinite loop."
-        //                 currentBuild.result = 'SUCCESS'
-        //                 sh 'exit 0'
-        //             }
-        //         }
-        //     }
-        // }
-
-    when {
-        expression {
-            def lastAuthor = sh(script: 'git log -1 --pretty=format:%an', returnStdout: true).trim()
-            echo "Last commit author: ${lastAuthor}"
-            return lastAuthor != "Jenkins CI"
+                    // Skip the build if author is Jenkins
+                    if (lastAuthor == "Jenkins CI") {
+                        echo "Last commit was by Jenkins. Skipping build to avoid infinite loop."
+                        currentBuild.result = 'SUCCESS'
+                        // Abort remaining stages by throwing FlowInterruptedException
+                        error("Build skipped due to last commit by Jenkins CI")
+                    }
+                }
+            }
         }
-    }
+
 
         stage('Clone code from GitHub') {
             steps {
