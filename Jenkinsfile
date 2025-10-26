@@ -25,7 +25,7 @@ pipeline {
                     if (lastAuthor == "Jenkins CI") {
                         echo "Last commit was by Jenkins. Skipping build to avoid infinite loop."
                         currentBuild.result = 'SUCCESS'
-                        return
+                        error("Build skipped because last commit was made by Jenkins CI")
                     }
                 }
             }
