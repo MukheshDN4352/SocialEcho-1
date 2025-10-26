@@ -10,12 +10,20 @@ pipeline {
 
     stages {
 
-        stage('Check changes') {
+        stage('Skip Jenkins Commits') {
             steps {
                 script {
-                    def changeFiles = sh(returnStdout: true, script: 'git diff --name-only HEAD~1 HEAD').trim()
-                    if (changeFiles.contains('deployments/')) {
-                        echo "Only deployment files changed. Skipping build."
+                    // Get the author of the last commit
+                    def lastAuthor = sh(
+                        script: 'git log -1 --pretty=format:%an',
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Last commit author: ${lastAuthor}"
+
+                    // Skip the build if author is Jenkins
+                    if (lastAuthor == "Jenkins CI") {
+                        echo "Last commit was by Jenkins. Skipping build to avoid infinite loop."
                         currentBuild.result = 'SUCCESS'
                         return
                     }
