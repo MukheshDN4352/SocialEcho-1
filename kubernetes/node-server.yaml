@@ -20,7 +20,7 @@ spec:
         eks.amazonaws.com/nodegroup: backend-ng    # Updated for EKS nodegroup
       containers:
       - name: backend
-        image: mukheshdn/backend:11
+        image: mukheshdn/backend:13
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 4000
