@@ -151,7 +151,7 @@ pipeline {
                             git add kubernetes/frontend-canary.yaml kubernetes/node-canary.yaml kubernetes/frontend-server.yaml kubernetes/node-server.yaml
                             git commit -m "Update Canary & Promote Stable - Build #${BUILD_NUMBER}" || echo "No changes to commit"
 
-                            git push https://$GIT_USER:$GIT_PASS@github.com/MukheshDN4352/Kubernetes.git master
+                            git push https://$GIT_USER:$GIT_PASS@github.com/MukheshDN4352/Kubernetes.git main
 
                             cd ..
                         '''
