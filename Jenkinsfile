@@ -10,28 +10,18 @@ pipeline {
 
     stages {
 
-        stage('Skip Jenkins Commits') {
+        stage('Check changes') {
             steps {
                 script {
-                    // Get the author of the last commit
-                    def lastAuthor = sh(
-                        script: 'git log -1 --pretty=format:%an',
-                        returnStdout: true
-                    ).trim()
-
-                    echo "Last commit author: ${lastAuthor}"
-
-                    // Skip the build if author is Jenkins
-                    if (lastAuthor == "Jenkins CI") {
-                        echo "Last commit was by Jenkins. Skipping build to avoid infinite loop."
+                    def changeFiles = sh(returnStdout: true, script: 'git diff --name-only HEAD~1 HEAD').trim()
+                    if (changeFiles.contains('deployments/')) {
+                        echo "Only deployment files changed. Skipping build."
                         currentBuild.result = 'SUCCESS'
-                        // Abort remaining stages by throwing FlowInterruptedException
-                        error("Build skipped due to last commit by Jenkins CI")
+                        return
                     }
                 }
             }
         }
-
 
         stage('Clone code from GitHub') {
             steps {
@@ -43,15 +33,19 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        echo "Promoting existing canary image to stable..."
-                        cd kubernetes
+                        echo "Cloning Kubernetes repo for promotion..."
+                        rm -rf Kubernetes
+                        git clone https://github.com/MukheshDN4352/Kubernetes.git
+                        cd Kubernetes/kubernetes
 
+                        echo "Promoting existing canary image to stable..."
                         FRONT_IMG=$(grep "image:" frontend-canary.yaml | awk '{print $2}')
                         BACK_IMG=$(grep "image:" node-canary.yaml | awk '{print $2}')
 
                         sed -i "s|image: .*|image: ${FRONT_IMG}|" frontend-server.yaml
                         sed -i "s|image: .*|image: ${BACK_IMG}|" node-server.yaml
-                        cd ..
+
+                        cd ../..
                     '''
                 }
             }
@@ -129,11 +123,16 @@ pipeline {
             steps {
                 script {
                     sh '''
+                        echo "Cloning Kubernetes repo for canary update..."
+                        rm -rf Kubernetes
+                        git clone https://github.com/MukheshDN4352/Kubernetes.git
+                        cd Kubernetes/kubernetes
+
                         echo "Updating canary YAML files with new images..."
-                        cd kubernetes
                         sed -i "s|image: mukheshdn/frontend:.*|image: mukheshdn/frontend:${BUILD_NUMBER}|" frontend-canary.yaml
                         sed -i "s|image: mukheshdn/backend:.*|image: mukheshdn/backend:${BUILD_NUMBER}|" node-canary.yaml
-                        cd ..
+
+                        cd ../..
                     '''
                 }
             }
@@ -144,14 +143,17 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: env.GITHUB_CREDENTIALS_ID, usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
                         sh '''
-                            echo "Committing and pushing updated YAMLs to GitHub..."
+                            echo "Committing and pushing updated YAMLs to Kubernetes repo..."
+                            cd Kubernetes
                             git config --global user.email "jenkins@ci.com"
                             git config --global user.name "Jenkins CI"
 
                             git add kubernetes/frontend-canary.yaml kubernetes/node-canary.yaml kubernetes/frontend-server.yaml kubernetes/node-server.yaml
                             git commit -m "Update Canary & Promote Stable - Build #${BUILD_NUMBER}" || echo "No changes to commit"
 
-                            git push https://$GIT_USER:$GIT_PASS@github.com/MukheshDN4352/SocialEcho-1.git master
+                            git push https://$GIT_USER:$GIT_PASS@github.com/MukheshDN4352/Kubernetes.git master
+
+                            cd ..
                         '''
                     }
                 }
