@@ -44,13 +44,14 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: backend
+                name: backend      # <- this references the ACTION
                 port:
                   name: use-annotation
+
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: frontend
+                name: frontend    # <- this references the ACTION
                 port:
                   name: use-annotation
