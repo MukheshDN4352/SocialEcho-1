@@ -19,10 +19,10 @@ spec:
         version: v2
     spec:
       nodeSelector:
-        eks.amazonaws.com/nodegroup: canary-ng    # Updated for EKS nodegroup
+        eks.amazonaws.com/nodegroup: frontend-canary-ng     # Updated for EKS nodegroup
       containers:
       - name: frontend
-        image: mukheshdn/frontend:16
+        image: mukheshdn/frontend:02
         ports:
         - containerPort: 80
         resources:
