@@ -37,7 +37,7 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-    - host: socialecho-alb-1552784028.ap-south-1.elb.amazonaws.com
+    - host: socialecho-alb-847014775.ap-south-1.elb.amazonaws.com
       http:
         paths:
           - path: /api

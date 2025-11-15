@@ -19,7 +19,7 @@ spec:
         version: v2
     spec:
       nodeSelector:
-        eks.amazonaws.com/nodegroup: backend-canary-ng    # Canary node group
+        eks.amazonaws.com/nodegroup: frontend-canary-ng    # Canary node group
       containers:
       - name: backend
         image: mukheshdn/backend:02
