@@ -9,7 +9,7 @@ pipeline {
     }
 
     stages {
-
+        
         stage('Clone code from GitHub') {
             steps {
                 git url: "https://github.com/MukheshDN4352/SocialEcho-1.git", branch: "master"
@@ -19,21 +19,32 @@ pipeline {
         stage('Promote existing Canary → Stable') {
             steps {
                 script {
-                    sh '''
-                        echo "Cloning Kubernetes repo for promotion..."
-                        rm -rf Kubernetes
-                        git clone https://github.com/MukheshDN4352/Kubernetes.git
-                        cd Kubernetes/kubernetes
+                    withCredentials([usernamePassword(credentialsId: env.GITHUB_CREDENTIALS_ID, usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                        sh '''
+                            echo "Cloning Kubernetes repo for promotion..."
+                            rm -rf Kubernetes
+                            git clone https://$GIT_USER:$GIT_PASS@github.com/MukheshDN4352/Kubernetes.git
+                            cd Kubernetes/kubernetes
 
-                        echo "Promoting existing canary image to stable..."
-                        FRONT_IMG=$(grep "image:" frontend-canary.yaml | awk '{print $2}')
-                        BACK_IMG=$(grep "image:" node-canary.yaml | awk '{print $2}')
+                            echo "Promoting existing canary image to stable..."
+                            FRONT_IMG=$(grep "image:" frontend-canary.yaml | awk '{print $2}')
+                            BACK_IMG=$(grep "image:" node-canary.yaml | awk '{print $2}')
 
-                        sed -i "s|image: .*|image: ${FRONT_IMG}|" frontend-server.yaml
-                        sed -i "s|image: .*|image: ${BACK_IMG}|" node-server.yaml
+                            sed -i "s|image: .*|image: ${FRONT_IMG}|" frontend-server.yaml
+                            sed -i "s|image: .*|image: ${BACK_IMG}|" node-server.yaml
 
-                        cd ../..
-                    '''
+                            echo "Committing and pushing Stable promotion changes..."
+                            git config user.email "jenkins@ci.com"
+                            git config user.name "Jenkins CI"
+
+                            git add frontend-server.yaml node-server.yaml
+                            git commit -m "Promote Canary to Stable - Build #${BUILD_NUMBER}" || echo "No stable changes to commit"
+
+                            git push https://$GIT_USER:$GIT_PASS@github.com/MukheshDN4352/Kubernetes.git main
+
+                            cd ../..
+                        '''
+                    }
                 }
             }
         }
@@ -136,7 +147,7 @@ pipeline {
                             git config --global user.name "Jenkins CI"
 
                             git add kubernetes/frontend-canary.yaml kubernetes/node-canary.yaml kubernetes/frontend-server.yaml kubernetes/node-server.yaml
-                            git commit -m "Update Canary & Promote Stable - Build #${BUILD_NUMBER}" || echo "No changes to commit"
+                            git commit -m "Update Canary & Promote Stable - Build #${BUILD_NUMBER}" || echo "No new canary changes to commit"
 
                             git push https://$GIT_USER:$GIT_PASS@github.com/MukheshDN4352/Kubernetes.git main
 
@@ -158,7 +169,7 @@ Hello,
 
 The Jenkins pipeline ${env.JOB_NAME} completed successfully. ✅
 
-Build Number: ${env.BUILD_NUMBER}
+Build Number: ${BUILD_NUMBER}
 Status: SUCCESS
 Project: SocialEcho
 
@@ -179,7 +190,7 @@ Hello,
 
 The Jenkins pipeline ${env.JOB_NAME} has FAILED. ❌
 
-Build Number: ${env.BUILD_NUMBER}
+Build Number: ${BUILD_NUMBER}
 Status: FAILURE
 
 Please check the Jenkins console logs for more details:
