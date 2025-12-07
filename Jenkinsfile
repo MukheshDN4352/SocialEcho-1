@@ -9,7 +9,7 @@ pipeline {
     }
 
     stages {
-
+        
         stage('Clone code from GitHub') {
             steps {
                 git url: "https://github.com/MukheshDN4352/SocialEcho-1.git", branch: "master"
