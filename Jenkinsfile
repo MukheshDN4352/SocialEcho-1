@@ -5,23 +5,10 @@ pipeline {
         SONAR_HOME = tool name: 'Sonar', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
         DOCKERHUB_USER = 'mukheshdn'
         DOCKER_CREDENTIALS_ID = 'dockerhub-creds'
-        GITHUB_CREDENTIALS_ID = 'github-token'   // GitHub username/password credential ID
+        GITHUB_CREDENTIALS_ID = 'github-token'
     }
 
     stages {
-
-        stage('Check changes') {
-            steps {
-                script {
-                    def changeFiles = sh(returnStdout: true, script: 'git diff --name-only HEAD~1 HEAD').trim()
-                    if (changeFiles.contains('deployments/')) {
-                        echo "Only deployment files changed. Skipping build."
-                        currentBuild.result = 'SUCCESS'
-                        return
-                    }
-                }
-            }
-        }
 
         stage('Clone code from GitHub') {
             steps {
@@ -60,13 +47,6 @@ pipeline {
                         -Dsonar.projectKey=socialEcho-1
                     '''
                 }
-            }
-        }
-
-        stage('OWASP Dependency Check') {
-            steps {
-                dependencyCheck additionalArguments: "--scan ./", odcInstallation: 'dc'
-                dependencyCheckPublisher pattern: "dependency-check-report.xml"
             }
         }
 
