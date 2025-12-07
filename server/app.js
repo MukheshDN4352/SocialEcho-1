@@ -66,7 +66,7 @@ app.use("/api/communities", communityRoutes);
 app.use("/api/admin", adminRoutes);
  
 app.get("/api/version", (req, res) => {
-  res.json({ version: "canary-version-5" });
+  res.json({ version: "Updated-App-version" });
 });
 
 
