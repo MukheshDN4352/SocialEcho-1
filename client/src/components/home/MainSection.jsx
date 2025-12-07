@@ -73,7 +73,7 @@ const MainSection = ({ userData }) => {
       {posts.length === 0 && (
         <div className="text-center text-gray-700 flex justify-center items-center flex-col">
           <p className="py-5 font-semibold">
-           msa pagaragilina firuuuuuuuu
+           Hi welcome 
           </p>
           <img loading="lazy" src={Home} alt="no post" />
         </div>
